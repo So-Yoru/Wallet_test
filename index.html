@@ -38,7 +38,7 @@
         }
 
         .glass-pill {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -46,25 +46,11 @@
         }
 
         .spring-press {
-            transition: transform 0.22s var(--ios-bounce), opacity 0.2s ease;
+            transition: transform 0.2s var(--ios-bounce), opacity 0.2s ease;
         }
         .spring-press:active {
-            transform: scale(0.93);
+            transform: scale(0.94);
             opacity: 0.85;
-        }
-
-        .sheet-backdrop {
-            transition: opacity 0.28s ease;
-        }
-        .sheet-container {
-            transition: transform 0.32s var(--ios-spring);
-        }
-        .sheet-open .sheet-backdrop {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .sheet-open .sheet-container {
-            transform: translateY(0);
         }
 
         ::-webkit-scrollbar { width: 0px; height: 0px; }
@@ -127,11 +113,11 @@
 
         <!-- Big IN / OUT Buttons -->
         <div class="flex gap-4 mb-6">
-            <button onclick="openFlow('IN')" class="spring-press h-24 flex-1 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl flex flex-col items-center justify-center shadow-lg shadow-emerald-950/50 border border-emerald-400/30">
+            <button type="button" onclick="openFlow('IN')" class="spring-press h-24 flex-1 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl flex flex-col items-center justify-center shadow-lg shadow-emerald-950/50 border border-emerald-400/30 cursor-pointer">
                 <span class="text-3xl font-black">＋</span>
                 <span class="text-xs font-black tracking-widest uppercase">Income</span>
             </button>
-            <button onclick="openFlow('OUT')" class="spring-press h-24 flex-1 bg-gradient-to-br from-rose-500 to-rose-700 rounded-3xl flex flex-col items-center justify-center shadow-lg shadow-rose-950/50 border border-rose-400/30">
+            <button type="button" onclick="openFlow('OUT')" class="spring-press h-24 flex-1 bg-gradient-to-br from-rose-500 to-rose-700 rounded-3xl flex flex-col items-center justify-center shadow-lg shadow-rose-950/50 border border-rose-400/30 cursor-pointer">
                 <span class="text-3xl font-black">－</span>
                 <span class="text-xs font-black tracking-widest uppercase">Expense</span>
             </button>
@@ -170,74 +156,87 @@
     </main>
 
     <!-- ==================== CLEAN 2-ITEM BOTTOM NAV ==================== -->
-    <div class="fixed bottom-6 left-0 right-0 max-w-xs mx-auto px-4 z-40">
+    <div class="fixed bottom-6 left-0 right-0 max-w-xs mx-auto px-4 z-30">
         <nav class="glass-pill rounded-[2rem] px-6 py-2.5 flex justify-around items-center border border-white/15 shadow-2xl">
-            <button id="navTx" onclick="switchTab('tx')" class="spring-press flex items-center gap-2 text-blue-400">
+            <button id="navTx" onclick="switchTab('tx')" class="spring-press flex items-center gap-2 text-blue-400 cursor-pointer">
                 <span class="text-lg">💳</span>
                 <span class="text-xs font-black uppercase tracking-wider">Wallet</span>
             </button>
             <div class="w-px h-6 bg-white/10"></div>
-            <button id="navAnalytics" onclick="switchTab('analytics')" class="spring-press flex items-center gap-2 text-slate-400">
+            <button id="navAnalytics" onclick="switchTab('analytics')" class="spring-press flex items-center gap-2 text-slate-400 cursor-pointer">
                 <span class="text-lg">📊</span>
                 <span class="text-xs font-black uppercase tracking-wider">Analytics</span>
             </button>
         </nav>
     </div>
 
-    <!-- ==================== TRANSACTION FLOW SHEET ==================== -->
-    <div id="flowModal" class="fixed inset-0 z-50 pointer-events-none flex flex-col justify-end">
-        <div onclick="closeModal()" class="sheet-backdrop absolute inset-0 bg-black/75 opacity-0 pointer-events-none backdrop-blur-sm"></div>
-        <div class="sheet-container relative w-full bg-slate-900 glass-card rounded-t-[2.5rem] p-6 pb-12 translate-y-full border-t border-white/15">
-            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-6"></div>
-            <div class="flex justify-between items-center mb-4">
-                <button onclick="closeModal()" class="text-slate-400 text-sm font-bold spring-press">Cancel</button>
-                <button id="deleteBtn" onclick="deleteTransaction()" class="hidden text-rose-500 text-xs font-bold border border-rose-900/60 px-3 py-1.5 rounded-xl spring-press">Delete</button>
-            </div>
+    <!-- ==================== RELIABLE TRANSACTION MODAL ==================== -->
+    <div id="flowModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <!-- Backdrop -->
+        <div onclick="closeModal()" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+        <!-- Sheet Form Card -->
+        <div class="relative w-full max-w-md bg-slate-900 glass-card rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 pb-8 border-t sm:border border-white/15 z-10">
+            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
             
-            <!-- STEP 1: AMOUNT -->
-            <div id="stepAmount">
-                <p id="flowTitle" class="font-bold text-center text-sm uppercase tracking-widest mb-3"></p>
-                <div class="relative flex items-center justify-center my-4">
-                    <span class="text-4xl font-black text-slate-500 mr-2">₹</span>
-                    <input type="text" id="amountInput" placeholder="0" inputmode="numeric" oninput="formatInput(this)" class="bg-transparent text-5xl text-center outline-none border-none font-black text-white w-56">
-                </div>
-                <div class="h-1 w-12 bg-blue-500 mx-auto mt-2 mb-8 rounded-full"></div>
-                <button onclick="nextStep()" class="spring-press w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-base shadow-lg shadow-blue-900/30">Next</button>
+            <div class="flex justify-between items-center mb-5">
+                <button type="button" onclick="closeModal()" class="text-slate-400 text-sm font-bold spring-press">Cancel</button>
+                <p id="flowTitle" class="font-black text-sm uppercase tracking-widest text-white"></p>
+                <button id="deleteBtn" type="button" onclick="deleteTransaction()" class="hidden text-rose-500 text-xs font-bold border border-rose-900/60 px-3 py-1.5 rounded-xl spring-press">Delete</button>
             </div>
 
-            <!-- STEP 2: CATEGORY & REASON -->
-            <div id="stepReason" style="display: none;">
-                <p class="text-slate-400 text-xs text-center uppercase tracking-widest font-black mb-3">Choose Category</p>
-                <div class="flex justify-center gap-2 mb-6">
-                    <button type="button" onclick="setCategory('Food')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Food</button>
-                    <button type="button" onclick="setCategory('Travel')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Travel</button>
-                    <button type="button" onclick="setCategory('Bills')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Bills</button>
-                    <button type="button" onclick="setCategory('Other')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Other</button>
+            <!-- Amount Input -->
+            <div class="mb-6">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest text-center mb-2">Amount</p>
+                <div class="flex items-center justify-center bg-slate-800/50 rounded-2xl p-3 border border-white/10">
+                    <span class="text-3xl font-black text-slate-400 mr-2">₹</span>
+                    <input type="number" id="numAmount" placeholder="0" class="bg-transparent text-4xl text-left outline-none border-none font-black text-white w-48" inputmode="numeric">
                 </div>
-                <p class="text-slate-400 text-xs text-center uppercase tracking-widest font-black mb-2">Reason / Note</p>
-                <input type="text" id="reasonInput" placeholder="Chai, Lunch, Metro, etc." class="glass-pill border border-white/10 p-4 rounded-2xl text-lg w-full mb-6 outline-none text-center text-white">
-                <button onclick="saveTransaction()" class="spring-press w-full bg-white text-black py-4 rounded-2xl font-black text-base shadow-xl">Save Record</button>
             </div>
+
+            <!-- Categories -->
+            <div class="mb-5">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest text-center mb-2.5">Category</p>
+                <div class="grid grid-cols-4 gap-2">
+                    <button type="button" onclick="setCategory('Food')" class="cat-pill py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Food</button>
+                    <button type="button" onclick="setCategory('Travel')" class="cat-pill py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Travel</button>
+                    <button type="button" onclick="setCategory('Bills')" class="cat-pill py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Bills</button>
+                    <button type="button" onclick="setCategory('Other')" class="cat-pill py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 spring-press">Other</button>
+                </div>
+            </div>
+
+            <!-- Reason / Note -->
+            <div class="mb-6">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest text-center mb-2">Reason / Note</p>
+                <input type="text" id="reasonInput" placeholder="Chai, Lunch, Metro, etc." class="glass-pill border border-white/10 p-3.5 rounded-2xl text-base w-full outline-none text-center text-white">
+            </div>
+
+            <!-- Submit -->
+            <button type="button" onclick="saveTransaction()" class="spring-press w-full bg-white text-black py-4 rounded-2xl font-black text-base shadow-xl">
+                Save Transaction
+            </button>
         </div>
     </div>
 
     <!-- ==================== CUSTOM CHIP CREATOR SHEET ==================== -->
-    <div id="chipModal" class="fixed inset-0 z-50 pointer-events-none flex flex-col justify-end">
-        <div onclick="closeChipModal()" class="sheet-backdrop absolute inset-0 bg-black/75 opacity-0 pointer-events-none backdrop-blur-sm"></div>
-        <div class="sheet-container relative w-full bg-slate-900 glass-card rounded-t-[2.5rem] p-6 pb-12 translate-y-full border-t border-white/15">
-            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4"></div>
-            <h3 class="text-base font-black text-center mb-5 tracking-tight">Create Quick Chip</h3>
-            <div class="space-y-3 mb-6">
+    <div id="chipModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div onclick="closeChipModal()" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="relative w-full max-w-md bg-slate-900 glass-card rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 pb-8 border-t sm:border border-white/15 z-10">
+            <h3 class="text-base font-black text-center mb-4 tracking-tight">Create Quick Chip</h3>
+            <div class="space-y-3 mb-5">
                 <input type="text" id="newChipEmoji" placeholder="Emoji (e.g. ☕, 🚇, 🍔)" maxlength="2" class="glass-pill w-full text-center p-3 text-xl rounded-xl outline-none border border-white/10 text-white">
                 <input type="text" id="newChipLabel" placeholder="Label (e.g. Chai, Bus)" class="glass-pill w-full text-center p-3 text-sm rounded-xl outline-none border border-white/10 font-bold text-white">
-                <input type="number" id="newChipAmount" placeholder="Default Amount (₹)" class="glass-pill w-full text-center p-3 text-sm rounded-xl outline-none border border-white/10 font-bold text-white">
+                <input type="number" id="newChipAmount" placeholder="Default Amount (₹)" class="glass-pill w-full text-center p-3 text-sm rounded-xl outline-none border border-white/10 font-bold text-white" inputmode="numeric">
             </div>
-            <button onclick="saveCustomChip()" class="spring-press w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm">Save Chip</button>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeChipModal()" class="spring-press flex-1 bg-slate-800 text-slate-300 py-3.5 rounded-2xl font-bold text-sm">Cancel</button>
+                <button type="button" onclick="saveCustomChip()" class="spring-press flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-black text-sm">Save Chip</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let tempTx = { type: '', rawAmount: 0, id: null, isEditing: false, category: 'Food' };
+        let currentFlow = { type: 'OUT', id: null, isEditing: false, category: 'Food' };
         const formatCurrency = (num) => new Intl.NumberFormat('en-IN').format(num);
 
         const DEFAULT_CHIPS = [
@@ -258,8 +257,9 @@
 
             chips.forEach((c, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'glass-pill px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap spring-press border-white/10 flex items-center gap-1.5 flex-shrink-0';
-                btn.innerHTML = `<span>${c.emoji}</span> <span>${c.label}</span> <span class="text-emerald-400">₹${c.amount}</span>`;
+                btn.type = 'button';
+                btn.className = 'glass-pill px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap spring-press border-white/10 flex items-center gap-1.5 flex-shrink-0 cursor-pointer';
+                btn.innerHTML = `<span>${c.emoji}</span> <span>${c.label}</span> <span class="text-emerald-400 font-black">₹${c.amount}</span>`;
                 btn.onclick = () => quickExpense(c.amount, c.label, c.category);
 
                 let timer;
@@ -278,25 +278,29 @@
             });
 
             const addBtn = document.createElement('button');
-            addBtn.className = 'glass-pill px-3.5 py-2.5 rounded-2xl text-xs font-black text-blue-400 spring-press border-dashed border-blue-500/40 flex-shrink-0';
+            addBtn.type = 'button';
+            addBtn.className = 'glass-pill px-3.5 py-2.5 rounded-2xl text-xs font-black text-blue-400 spring-press border-dashed border-blue-500/40 flex-shrink-0 cursor-pointer';
             addBtn.innerHTML = '＋ New';
             addBtn.onclick = openChipModal;
             container.appendChild(addBtn);
         }
 
         function openChipModal() {
-            document.getElementById('chipModal').classList.add('sheet-open');
+            document.getElementById('chipModal').classList.remove('hidden');
         }
         function closeChipModal() {
-            document.getElementById('chipModal').classList.remove('sheet-open');
+            document.getElementById('chipModal').classList.add('hidden');
         }
 
         function saveCustomChip() {
             const emoji = document.getElementById('newChipEmoji').value.trim() || '💳';
             const label = document.getElementById('newChipLabel').value.trim() || 'Item';
-            const amount = parseInt(document.getElementById('newChipAmount').value) || 0;
+            const amount = parseInt(document.getElementById('newChipAmount').value, 10) || 0;
 
-            if (!amount) return alert('Enter a valid amount');
+            if (amount <= 0) {
+                alert('Enter a valid amount');
+                return;
+            }
 
             const chips = getCustomChips();
             chips.push({ emoji, label, amount, category: 'Food' });
@@ -327,12 +331,6 @@
             render();
         }
 
-        function formatInput(input) {
-            let clean = input.value.replace(/\D/g, "");
-            tempTx.rawAmount = clean ? parseInt(clean, 10) : 0;
-            input.value = clean ? formatCurrency(tempTx.rawAmount) : "";
-        }
-
         function switchTab(tab) {
             const txView = document.getElementById('tabTransactions');
             const analyticsView = document.getElementById('tabAnalytics');
@@ -342,46 +340,42 @@
             if (tab === 'tx') {
                 txView.classList.remove('hide-tab');
                 analyticsView.classList.add('hide-tab');
-                navTx.className = 'spring-press flex items-center gap-2 text-blue-400';
-                navAnalytics.className = 'spring-press flex items-center gap-2 text-slate-400';
+                navTx.className = 'spring-press flex items-center gap-2 text-blue-400 cursor-pointer';
+                navAnalytics.className = 'spring-press flex items-center gap-2 text-slate-400 cursor-pointer';
                 render();
             } else {
                 txView.classList.add('hide-tab');
                 analyticsView.classList.remove('hide-tab');
-                navTx.className = 'spring-press flex items-center gap-2 text-slate-400';
-                navAnalytics.className = 'spring-press flex items-center gap-2 text-blue-400';
+                navTx.className = 'spring-press flex items-center gap-2 text-slate-400 cursor-pointer';
+                navAnalytics.className = 'spring-press flex items-center gap-2 text-blue-400 cursor-pointer';
                 renderAnalytics();
             }
         }
 
         function setCategory(cat) {
-            tempTx.category = cat;
+            currentFlow.category = cat;
             document.querySelectorAll('.cat-pill').forEach(btn => {
                 if (btn.innerText === cat) {
-                    btn.className = 'cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-blue-500 bg-blue-600 text-white spring-press';
+                    btn.className = 'cat-pill py-2.5 rounded-xl text-xs font-bold border border-blue-500 bg-blue-600 text-white spring-press';
                 } else {
-                    btn.className = 'cat-pill px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-300 spring-press';
+                    btn.className = 'cat-pill py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-300 spring-press';
                 }
             });
         }
 
         function openFlow(type) {
-            tempTx = { type, rawAmount: 0, id: null, isEditing: false, category: 'Food' };
+            currentFlow = { type: type, id: null, isEditing: false, category: 'Food' };
             const titleEl = document.getElementById('flowTitle');
             titleEl.innerText = type === 'IN' ? 'Income' : 'Expense';
-            titleEl.className = type === 'IN' ? 'text-emerald-400 font-bold text-center text-sm uppercase tracking-widest mb-3' : 'text-rose-400 font-bold text-center text-sm uppercase tracking-widest mb-3';
+            titleEl.className = type === 'IN' ? 'font-black text-sm uppercase tracking-widest text-emerald-400' : 'font-black text-sm uppercase tracking-widest text-rose-400';
             
-            document.getElementById('deleteBtn').classList.add('hidden');
-            document.getElementById('amountInput').value = '';
+            document.getElementById('numAmount').value = '';
             document.getElementById('reasonInput').value = '';
+            document.getElementById('deleteBtn').classList.add('hidden');
             setCategory('Food');
 
-            // Reset back to Step 1
-            document.getElementById('stepAmount').style.display = 'block';
-            document.getElementById('stepReason').style.display = 'none';
-
-            document.getElementById('flowModal').classList.add('sheet-open');
-            setTimeout(() => document.getElementById('amountInput').focus(), 250);
+            document.getElementById('flowModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('numAmount').focus(), 150);
         }
 
         function openEdit(id) {
@@ -389,56 +383,50 @@
             const item = historyData.find(t => t.id === id);
             if (!item) return;
 
-            tempTx = { ...item, rawAmount: item.amount, isEditing: true, category: item.category || 'Other' };
+            currentFlow = { type: item.type, id: item.id, isEditing: true, category: item.category || 'Other' };
             const titleEl = document.getElementById('flowTitle');
             titleEl.innerText = "Edit Entry";
-            titleEl.className = 'text-white font-bold text-center text-sm uppercase tracking-widest mb-3';
+            titleEl.className = 'font-black text-sm uppercase tracking-widest text-white';
 
-            document.getElementById('amountInput').value = formatCurrency(item.amount);
+            document.getElementById('numAmount').value = item.amount;
             document.getElementById('reasonInput').value = item.reason;
-            setCategory(tempTx.category);
+            setCategory(currentFlow.category);
             document.getElementById('deleteBtn').classList.remove('hidden');
 
-            document.getElementById('flowModal').classList.add('sheet-open');
-            document.getElementById('stepAmount').style.display = 'none';
-            document.getElementById('stepReason').style.display = 'block';
-            setTimeout(() => document.getElementById('reasonInput').focus(), 250);
+            document.getElementById('flowModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('reasonInput').focus(), 150);
         }
 
         function closeModal() {
-            document.getElementById('flowModal').classList.remove('sheet-open');
-            setTimeout(() => {
-                document.getElementById('stepAmount').style.display = 'block';
-                document.getElementById('stepReason').style.display = 'none';
-            }, 300);
-        }
-
-        function nextStep() {
-            if (!tempTx.rawAmount || tempTx.rawAmount <= 0) {
-                alert("Please enter a valid amount");
-                return;
-            }
-            document.getElementById('stepAmount').style.display = 'none';
-            document.getElementById('stepReason').style.display = 'block';
-            setTimeout(() => document.getElementById('reasonInput').focus(), 200);
+            document.getElementById('flowModal').classList.add('hidden');
         }
 
         function saveTransaction() {
+            const amountVal = parseFloat(document.getElementById('numAmount').value);
+            if (!amountVal || isNaN(amountVal) || amountVal <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
             const reason = document.getElementById('reasonInput').value.trim() || 'Other';
             let historyData = JSON.parse(localStorage.getItem('wallet_history') || '[]');
             const now = new Date();
 
-            if (tempTx.isEditing) {
-                historyData = historyData.map(t => (t.id === tempTx.id ? { 
-                    ...t, amount: tempTx.rawAmount, reason, category: tempTx.category, edited: true 
+            if (currentFlow.isEditing) {
+                historyData = historyData.map(t => (t.id === currentFlow.id ? { 
+                    ...t, 
+                    amount: amountVal, 
+                    reason: reason, 
+                    category: currentFlow.category, 
+                    edited: true 
                 } : t));
             } else {
                 historyData.unshift({
                     id: Date.now(), 
-                    type: tempTx.type, 
-                    amount: tempTx.rawAmount, 
-                    reason,
-                    category: tempTx.category,
+                    type: currentFlow.type, 
+                    amount: amountVal, 
+                    reason: reason,
+                    category: currentFlow.category,
                     time: now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
                     date: now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
                     timestamp: now.getTime(),
@@ -454,7 +442,7 @@
         function deleteTransaction() {
             if (confirm("Delete this entry?")) {
                 let historyData = JSON.parse(localStorage.getItem('wallet_history') || '[]');
-                localStorage.setItem('wallet_history', JSON.stringify(historyData.filter(t => t.id !== tempTx.id)));
+                localStorage.setItem('wallet_history', JSON.stringify(historyData.filter(t => t.id !== currentFlow.id)));
                 closeModal(); 
                 render();
             }
